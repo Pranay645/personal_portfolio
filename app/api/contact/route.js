@@ -67,7 +67,23 @@ async function sendEmail(payload, message) {
   }
 };
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
+}
+
 export async function POST(request) {
+  const headers = {
+      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
   try {
     const payload = await request.json();
     const { name, email, message: userMessage } = payload;
@@ -79,7 +95,7 @@ export async function POST(request) {
       return NextResponse.json({
         success: false,
         message: 'Telegram token or chat ID is missing.',
-      }, { status: 400 });
+      }, { status: 400, headers });
     }
 
     const message = `New message from ${name}\n\nEmail: ${email}\n\nMessage:\n\n${userMessage}\n\n`;
@@ -95,18 +111,18 @@ export async function POST(request) {
       return NextResponse.json({
         success: true,
         message: 'Message and email sent successfully!',
-      }, { status: 200 });
+      }, { status: 200, headers });
     }
 
     return NextResponse.json({
       success: false,
       message: 'Failed to send message or email.',
-    }, { status: 500 });
+    }, { status: 500 , headers});
   } catch (error) {
     console.error('API Error:', error.message);
     return NextResponse.json({
       success: false,
       message: 'Server error occurred.',
-    }, { status: 500 });
+    }, { status: 500 , headers});
   }
 };
